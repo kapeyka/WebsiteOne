@@ -10,6 +10,8 @@ require 'capybara-screenshot/rspec'
 require 'public_activity/testing'
 require 'paper_trail/frameworks/rspec'
 require 'selenium/webdriver'
+require 'email_spec'
+require 'email_spec/rspec'
 
 PublicActivity.enabled = true
 

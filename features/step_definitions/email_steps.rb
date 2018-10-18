@@ -11,14 +11,35 @@ And /^"(.*?)" should( not)? receive a "(.*?)" email(?: containing "(.*)")?$/ do 
 end
 
 def check_email(email, negate, subject, body = nil)
-  unless negate
 
-    expect(ActionMailer::Base.deliveries[0].subject).to include(subject)
-    expect(ActionMailer::Base.deliveries[0].body).to include(body) unless body.nil?
-    expect(ActionMailer::Base.deliveries[0].to).to include(email) unless email.nil?
-  else
-    expect(ActionMailer::Base.deliveries.size).to eq 0
+  emails = ActionMailer::Base.deliveries
+
+  matches = emails.map do |mail|
+    # TODO use https://github.com/samg/diffy
+    # puts subject, body, email
+    # puts mail.subject, mail.body, mail.to
+    [mail.subject == subject,   # 'hello' - 'hello' ==> ''  # 'hellow' - hello ==> 'w'
+    body_match = body.nil? ? true : mail.body == body,
+    email_match = mail.to.include?(email)]
   end
+  # matches might =? [[false, false, true],[true, true, true]]
+
+  if negate
+    expect(matches).not_to include [true, true, true]
+  else
+    expect(matches).to include [true, true, true]
+  end
+
+  # expect(emails).to include_email_with_subject(subject)
+#  it { is_expected.to include(be_odd.and be < 10) }
+  # unless negate
+
+  #   expect(ActionMailer::Base.deliveries[0].subject).to include(subject)
+  #   expect(ActionMailer::Base.deliveries[0].body).to include(body) unless body.nil?
+  #   expect(ActionMailer::Base.deliveries[0].to).to include(email) unless email.nil?
+  # else
+  #   expect(ActionMailer::Base.deliveries.size).to eq 0
+  # end
 end
 
 And /^I should not receive an email$/ do
